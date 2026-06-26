@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ 维权宝 - 聊天记录取证与 AI 智能分析</title>
+    <meta name="description" content="一站式导出钉钉、微信、QQ、飞书聊天记录，AI 智能分析维权要素">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --ai: #8b5cf6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text2: #64748b;
+            --border: #e2e8f0;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+        /* Hero */
+        .hero { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #8b5cf6 100%); color: white; padding: 80px 20px 60px; text-align: center; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); animation: float 20s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
+        .hero h1 { font-size: 48px; margin-bottom: 16px; position: relative; }
+        .hero h1 .icon { font-size: 56px; }
+        .hero p { font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; position: relative; }
+        .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; position: relative; }
+        .btn { padding: 12px 28px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-white { background: white; color: var(--primary); }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.5); }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+        /* Section */
+        .section { max-width: 1000px; margin: 0 auto; padding: 60px 20px; }
+        .section-title { text-align: center; margin-bottom: 40px; }
+        .section-title h2 { font-size: 32px; margin-bottom: 8px; }
+        .section-title p { color: var(--text2); font-size: 16px; }
+
+        /* Features Grid */
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; transition: all 0.2s; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); border-color: var(--primary); }
+        .feature-icon { font-size: 36px; margin-bottom: 12px; }
+        .feature-card h3 { font-size: 18px; margin-bottom: 8px; }
+        .feature-card p { color: var(--text2); font-size: 14px; }
+
+        /* Platform Table */
+        .platform-table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .platform-table th { background: var(--primary); color: white; padding: 14px 20px; text-align: left; font-weight: 600; }
+        .platform-table td { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+        .platform-table tr:last-child td { border-bottom: none; }
+        .platform-table tr:hover { background: var(--primary-light); }
+        .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .tag-green { background: #ecfdf5; color: #065f46; }
+        .tag-yellow { background: #fffbeb; color: #92400e; }
+        .tag-red { background: #fef2f2; color: #991b1b; }
+
+        /* AI Section */
+        .ai-showcase { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border-radius: var(--radius); padding: 40px; margin-top: 40px; }
+        .ai-showcase h3 { font-size: 22px; color: var(--ai); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+        .ai-item { background: white; border-radius: 8px; padding: 16px; border: 1px solid var(--border); }
+        .ai-item .emoji { font-size: 24px; margin-bottom: 8px; }
+        .ai-item h4 { font-size: 14px; margin-bottom: 4px; }
+        .ai-item p { font-size: 12px; color: var(--text2); }
+
+        /* Code Block */
+        .code-block { background: #1e293b; color: #e2e8f0; border-radius: var(--radius); padding: 24px; overflow-x: auto; margin: 16px 0; }
+        .code-block code { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 14px; line-height: 1.6; }
+        .code-block .comment { color: #94a3b8; }
+        .code-block .keyword { color: #c084fc; }
+        .code-block .string { color: #86efac; }
+
+        /* Steps */
+        .steps { counter-reset: step; }
+        .step { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+        .step::before { counter-increment: step; content: counter(step); width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 14px; }
+        .step-content { flex: 1; }
+        .step-content h4 { font-size: 16px; margin-bottom: 4px; }
+        .step-content p { color: var(--text2); font-size: 14px; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 13px; border-top: 1px solid var(--border); margin-top: 40px; }
+        .footer a { color: var(--primary); text-decoration: none; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .section { padding: 40px 16px; }
+            .ai-showcase { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+    <h1><span class="icon">🛡️</span> 维权宝</h1>
+    <p>一站式导出钉钉、微信、QQ、飞书聊天记录，AI 智能分析维权要素，生成专业维权方案</p>
+    <div class="hero-buttons">
+        <a href="https://github.com/your-username/weiquanbao/releases" class="btn btn-white">📥 下载使用</a>
+        <a href="https://github.com/your-username/weiquanbao" class="btn btn-outline">⭐ GitHub</a>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="section">
+    <div class="section-title">
+        <h2>🚀 核心功能</h2>
+        <p>从数据提取到维权方案，全流程覆盖</p>
+    </div>
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3>多平台支持</h3>
+            <p>钉钉、微信、QQ、飞书四大平台聊天记录一站式管理，跨平台搜索</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🤖</div>
+            <h3>AI 智能分析</h3>
+            <p>接入 OpenAI / DeepSeek / 智谱等大模型，自动识别案件类型、提取关键事实、评估证据强度</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📊</div>
+            <h3>证据评估</h3>
+            <p>自动分析证据强度，识别证据缺口，给出补充建议，帮你构建完整证据链</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚖️</div>
+            <h3>法律依据</h3>
+            <p>根据案件类型自动匹配相关法律条文，引用具体法条，让维权有据可依</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>时间线生成</h3>
+            <p>从聊天记录中自动提取关键时间节点，按重要性排序，还原事件全貌</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💰</div>
+            <h3>赔偿计算</h3>
+            <p>根据案情智能计算赔偿/补偿预期，N+1、退一赔三、逾期利息等自动识别</p>
+        </div>
+    </div>
+</div>
+
+<!-- Platforms -->
+<div class="section">
+    <div class="section-title">
+        <h2>📱 平台支持</h2>
+        <p>四大平台，各有特色</p>
+    </div>
+    <table class="platform-table">
+        <thead>
+            <tr><th>平台</th><th>使用方式</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>钉钉</strong></td>
+                <td>自动检测本地数据，开箱即用</td>
+                <td><span class="tag tag-green">✅ 最简单</span></td>
+            </tr>
+            <tr>
+                <td><strong>微信</strong></td>
+                <td>自动从内存提取密钥，需管理员权限</td>
+                <td><span class="tag tag-green">✅ 简单</span></td>
+            </tr>
+            <tr>
+                <td><strong>飞书</strong></td>
+                <td>通过开放平台 API 访问，一键配置</td>
+                <td><span class="tag tag-yellow">⚠️ 需配置</span></td>
+            </tr>
+            <tr>
+                <td><strong>QQ</strong></td>
+                <td>借助 qq-chat-exporter 先导出再导入</td>
+                <td><span class="tag tag-yellow">⚠️ 需先导出</span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- AI Analysis Showcase -->
+<div class="section">
+    <div class="ai-showcase">
+        <h3>🤖 AI 分析能力</h3>
+        <p>支持 OpenAI / DeepSeek / 智谱等兼容接口，无 API Key 时自动使用增强规则引擎</p>
+        <div class="ai-grid">
+            <div class="ai-item">
+                <div class="emoji">🎯</div>
+                <h4>案件类型识别</h4>
+                <p>劳动纠纷、消费维权、合同纠纷、债务纠纷、房屋租赁、交通事故</p>
+            </div>
+            <div class="ai-item">
+                <div class="emoji">👥</div>
+                <h4>当事人提取</h4>
+                <p>自动识别受害者、侵权方、第三方等角色</p>
+            </div>
+            <div class="ai-item">
+                <div class="emoji">📅</div>
+                <h4>时间线构建</h4>
+                <p>从消息中提取关键日期，按重要性标色排序</p>
+            </div>
+            <div class="ai-item">
+                <div class="emoji">📊</div>
+                <h4>证据强度评估</h4>
+                <p>分析证据完整性，给出强/中/弱评级和缺口提示</p>
+            </div>
+            <div class="ai-item">
+                <div class="emoji">💰</div>
+                <h4>赔偿预期</h4>
+                <p>根据案情计算赔偿范围和计算依据</p>
+            </div>
+            <div class="ai-item">
+                <div class="emoji">📝</div>
+                <h4>维权步骤</h4>
+                <p>生成带费用和时效的具体行动方案</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Start -->
+<div class="section">
+    <div class="section-title">
+        <h2>⚡ 快速开始</h2>
+        <p>三种使用方式</p>
+    </div>
+
+    <h3 style="margin-bottom:16px">方式一：下载 EXE（推荐）</h3>
+    <div class="steps">
+        <div class="step">
+            <div class="step-content">
+                <h4>下载 EXE 文件</h4>
+                <p>从 GitHub Releases 下载最新版本</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-content">
+                <h4>双击运行</h4>
+                <p>自动打开桌面窗口或浏览器</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-content">
+                <h4>选择平台 → 加载会话 → AI 分析</h4>
+                <p>一键分析聊天记录，生成维权方案</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin:32px 0 16px">方式二：网页版</h3>
+    <div class="steps">
+        <div class="step">
+            <div class="step-content">
+                <h4>访问网页版</h4>
+                <p>无需安装，浏览器直接使用</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-content">
+                <h4>导入聊天记录</h4>
+                <p>支持 QQ JSON 导入和飞书 API</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin:32px 0 16px">方式三：Python 源码</h3>
+    <div class="code-block"><code><span class="comment"># 安装依赖</span>
+pip install fastapi uvicorn apscheduler pymem cryptography zstandard
+
+<span class="comment"># 启动</span>
+python main.py
+
+<span class="comment"># 浏览器访问</span>
+http://localhost:8090</code></div>
+</div>
+
+<!-- Deploy -->
+<div class="section">
+    <div class="section-title">
+        <h2>🌐 部署网页版</h2>
+        <p>部署到服务器，随时随地访问</p>
+    </div>
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">🐳</div>
+            <h3>Docker 部署</h3>
+            <p>一键容器化部署，适合有服务器的用户</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">☁️</div>
+            <h3>Railway / Render</h3>
+            <p>免费云平台部署，适合个人使用</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔧</div>
+            <h3>自建服务器</h3>
+            <p>Nginx + Uvicorn，适合企业内部使用</p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>🛡️ 维权宝 — 让维权更简单</p>
+    <p style="margin-top:8px">本工具仅用于合法维权取证，请勿用于非法用途</p>
+    <p style="margin-top:8px"><a href="https://github.com/your-username/weiquanbao">GitHub</a> · <a href="https://github.com/your-username/weiquanbao/issues">Issues</a></p>
+</div>
+
+</body>
+</html>

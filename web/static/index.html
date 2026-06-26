@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维权宝 - 聊天记录取证与AI分析</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 顶栏 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="logo">🛡️ 维权宝</h1>
+                <span class="subtitle">聊天记录取证 · AI 智能分析</span>
+            </div>
+            <div class="header-center">
+                <div class="platform-tabs" id="platformTabs"></div>
+            </div>
+            <div class="header-right">
+                <button class="btn-icon" onclick="toggleSearch()" title="搜索消息">🔍</button>
+                <button class="btn-icon" onclick="showImport()" title="导入文件">📥</button>
+                <button class="btn-icon" onclick="showExports()" title="导出历史">📂</button>
+                <button class="btn-icon" onclick="showExport()" title="导出选中会话">📦</button>
+                <button class="btn-icon" onclick="showSettings()" title="AI 设置">⚙️</button>
+                <button class="btn-icon" onclick="refresh()" title="刷新">🔄</button>
+            </div>
+        </header>
+
+        <div class="search-bar" id="searchBar" style="display:none">
+            <input type="text" id="searchInput" placeholder="搜索消息..." autocomplete="off">
+            <button onclick="doSearch()">搜索</button>
+            <button onclick="closeSearch()">关闭</button>
+        </div>
+
+        <!-- 主体 -->
+        <div class="main-body">
+            <!-- 左侧：会话列表 -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <input type="text" id="convSearch" placeholder="筛选会话..." oninput="filterConversations()">
+                </div>
+                <div class="conv-list" id="convList">
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <p>选择平台加载会话</p>
+                    </div>
+                </div>
+                <div class="sidebar-footer" id="sidebarFooter"></div>
+            </aside>
+
+            <!-- 右侧：消息/分析区域 -->
+            <main class="content">
+                <div class="msg-header" id="msgHeader">
+                    <span>请选择一个会话</span>
+                    <div class="msg-actions" id="msgActions" style="display:none">
+                        <button class="btn-ai" onclick="showAIAnalysis()" title="AI 智能分析">🤖 AI 分析</button>
+                    </div>
+                </div>
+                <div class="msg-list" id="msgList">
+                    <div class="welcome-state">
+                        <div class="welcome-icon">🛡️</div>
+                        <h2>维权宝 - 聊天记录取证工具</h2>
+                        <p>支持钉钉、微信、QQ、飞书多平台聊天记录导出</p>
+                        <div class="welcome-features">
+                            <div class="feature-card">
+                                <div class="feature-icon">📱</div>
+                                <h3>多平台支持</h3>
+                                <p>钉钉/微信/QQ/飞书</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔍</div>
+                                <h3>智能搜索</h3>
+                                <p>跨平台关键词搜索</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📦</div>
+                                <h3>批量导出</h3>
+                                <p>选中会话一键导出</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🤖</div>
+                                <h3>AI 分析</h3>
+                                <p>智能识别维权要素</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="msg-footer" id="msgFooter" style="display:none">
+                    <button onclick="loadMore()">加载更多</button>
+                </div>
+            </main>
+        </div>
+
+        <!-- AI 分析弹窗 -->
+        <div class="modal-overlay" id="aiModal" style="display:none" onclick="closeModal(event, 'aiModal')">
+            <div class="modal modal-wide modal-ai" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>🤖 AI 维权分析</h2>
+                    <button class="modal-close" onclick="hideModal('aiModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="aiContent" class="ai-content">
+                        <div class="ai-loading">
+                            <div class="ai-spinner"></div>
+                            <p>AI 正在分析聊天记录...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出弹窗 -->
+        <div class="modal-overlay" id="exportModal" style="display:none" onclick="closeModal(event, 'exportModal')">
+            <div class="modal modal-wide" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>📦 导出聊天记录</h2>
+                    <button class="modal-close" onclick="hideModal('exportModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-section">
+                        <div class="export-toolbar">
+                            <input type="text" id="exportSearch" placeholder="筛选会话..." oninput="filterExportConvs()" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px">
+                            <button class="btn-sm" onclick="selectAllExport(true)">全选</button>
+                            <button class="btn-sm" onclick="selectAllExport(false)">取消全选</button>
+                            <span id="exportSelectedCount" class="export-count">已选 0 个</span>
+                        </div>
+                        <div id="exportConvList" class="export-conv-list">
+                            <p class="hint">加载中...</p>
+                        </div>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn-primary" onclick="doExport()">🚀 导出选中</button>
+                        <button class="btn-secondary" onclick="hideModal('exportModal')">取消</button>
+                    </div>
+                    <div id="exportStatus" class="export-status" style="display:none"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导出历史弹窗 -->
+        <div class="modal-overlay" id="exportsModal" style="display:none" onclick="closeModal(event, 'exportsModal')">
+            <div class="modal modal-wide" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>📂 导出历史</h2>
+                    <button class="modal-close" onclick="hideModal('exportsModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div id="exportHistoryList" class="export-history-list">
+                        <div class="loading">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 导入弹窗 -->
+        <div class="modal-overlay" id="importModal" style="display:none" onclick="closeModal(event, 'importModal')">
+            <div class="modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>📥 导入聊天记录</h2>
+                    <button class="modal-close" onclick="hideModal('importModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="import-section">
+                        <h3>支持的格式</h3>
+                        <ul class="import-formats">
+                            <li><strong>微信</strong>: CSV (WeChatMsg导出)、TXT (微信原生导出)</li>
+                            <li><strong>QQ</strong>: TXT (QQ自带导出) 或 JSON (qq-chat-exporter)</li>
+                        </ul>
+                        <div class="import-tip">
+                            💡 <strong>QQ 导出方法</strong>：打开 QQ → 消息管理器(Ctrl+Shift+Z) → 右键会话 → 导出消息记录 → 选TXT
+                        </div>
+                        <h3 style="margin-top:16px">文件路径</h3>
+                        <input type="text" id="importPath" placeholder="输入文件的完整路径" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--radius);margin-top:8px">
+                        <div class="import-actions" style="margin-top:12px">
+                            <button class="btn-primary" onclick="doImport()">🚀 导入</button>
+                            <button class="btn-secondary" onclick="hideModal('importModal')">取消</button>
+                        </div>
+                        <div id="importStatus" class="export-status" style="display:none;margin-top:12px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 设置弹窗 -->
+        <div class="modal-overlay" id="settingsModal" style="display:none" onclick="closeModal(event, 'settingsModal')">
+            <div class="modal" onclick="event.stopPropagation()">
+                <div class="modal-header">
+                    <h2>⚙️ AI 分析设置</h2>
+                    <button class="modal-close" onclick="hideModal('settingsModal')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <div class="settings-info">
+                            <p>配置 OpenAI 兼容的 API 接口，启用 AI 智能分析功能。</p>
+                            <p class="hint">未配置时将使用内置规则引擎（功能有限）。支持 OpenAI、DeepSeek、智谱 等兼容接口。</p>
+                        </div>
+                        <div class="settings-status" id="aiStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">检查中...</span>
+                        </div>
+                        <div class="settings-form">
+                            <label>API Key</label>
+                            <input type="password" id="aiApiKey" placeholder="sk-..." autocomplete="off">
+                            <label>API Base URL</label>
+                            <input type="text" id="aiApiBase" placeholder="https://api.openai.com/v1">
+                            <label>模型名称</label>
+                            <input type="text" id="aiModel" placeholder="gpt-4o-mini">
+                            <div class="settings-presets">
+                                <span class="hint">快速填写:</span>
+                                <button class="btn-sm" onclick="presetAI('openai')">OpenAI</button>
+                                <button class="btn-sm" onclick="presetAI('deepseek')">DeepSeek</button>
+                                <button class="btn-sm" onclick="presetAI('zhipu')">智谱</button>
+                                <button class="btn-sm" onclick="presetAI('custom')">自定义</button>
+                            </div>
+                        </div>
+                        <div class="settings-actions">
+                            <button class="btn-primary" onclick="saveAIConfig()">💾 保存</button>
+                            <button class="btn-secondary" onclick="hideModal('settingsModal')">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast 提示 -->
+        <div id="toast" class="toast" style="display:none"></div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>

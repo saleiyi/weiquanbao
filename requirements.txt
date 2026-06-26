@@ -1,0 +1,13 @@
+# 维权宝 - 依赖列表
+# 核心
+fastapi>=0.100.0
+uvicorn>=0.23.0
+apscheduler>=3.10.0
+
+# 微信平台需要
+pymem>=1.12.0
+cryptography>=41.0.0
+
+# 飞书平台需要
+playwright>=1.40.0
+requests>=2.31.0
