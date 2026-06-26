@@ -65,7 +65,11 @@ async function switchPlatform(name) {
 
 async function loadConversations() {
     const list = document.getElementById('convList');
-    list.innerHTML = '<div class="loading">加载中...</div>';
+    list.innerHTML =
+        '<div class="loading-animated">' +
+        '  <div class="loading-dots"><span></span><span></span><span></span></div>' +
+        '  <p>正在加载会话列表...</p>' +
+        '</div>';
     const name = state.currentPlatform;
     if (!name) { list.innerHTML = '<div class="loading">请先选择平台</div>'; return; }
 
@@ -119,7 +123,14 @@ async function selectConversation(cid) {
 
 async function loadMessages(reset) {
     const container = document.getElementById('msgList');
-    if (reset) container.innerHTML = '<div class="loading">加载中...</div>';
+    if (reset) {
+        container.innerHTML =
+            '<div class="loading-animated">' +
+            '  <div class="loading-dots"><span></span><span></span><span></span></div>' +
+            '  <p>正在加载消息...</p>' +
+            '  <p class="hint">首次加载可能需要几秒钟</p>' +
+            '</div>';
+    }
     const name = state.currentPlatform;
     const cid = state.currentCid;
     if (!cid) return;
@@ -143,7 +154,8 @@ function renderMessages() {
         container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>暂无消息</p></div>';
         return;
     }
-    container.innerHTML = '';
+    // 显示消息计数
+    container.innerHTML = '<div class="msg-count">已加载 ' + state.messages.length + ' 条消息</div>';
     for (const m of state.messages) {
         const item = document.createElement('div');
         const isSelf = m.sender_name === '我' || m.sender_id === 'me';
@@ -159,7 +171,13 @@ function renderMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-function loadMore() { loadMessages(false); }
+function loadMore() {
+    const footer = document.getElementById('msgFooter');
+    footer.innerHTML = '<div class="loading-bar"><div class="loading-bar-inner"></div></div>';
+    loadMessages(false).then(() => {
+        footer.innerHTML = '<button onclick="loadMore()">加载更多</button>';
+    });
+}
 
 // ─── 搜索 ──────────────────────────────────────────────────
 
@@ -176,7 +194,11 @@ async function doSearch() {
     const name = state.currentPlatform;
     if (!name) { showToast('请先选择平台', 'error'); return; }
     const container = document.getElementById('msgList');
-    container.innerHTML = '<div class="loading">搜索中...</div>';
+    container.innerHTML =
+        '<div class="loading-animated">' +
+        '  <div class="loading-dots"><span></span><span></span><span></span></div>' +
+        '  <p>正在搜索「' + escapeHtml(q) + '」...</p>' +
+        '</div>';
     try {
         const res = await fetch(API + '/platforms/' + name + '/search?q=' + encodeURIComponent(q) + '&limit=50');
         const data = await res.json();
