@@ -28,7 +28,7 @@
 
 ### 方式一：下载 EXE（推荐）
 
-1. 从 [Releases](https://github.com/your-username/weiquanbao/releases) 下载最新版本
+1. 从 [Releases](https://github.com/saleiyi/weiquanbao/releases) 下载最新版本
 2. 双击 `weiquanbao.exe` 运行
 3. 浏览器访问 `http://localhost:8090`
 
